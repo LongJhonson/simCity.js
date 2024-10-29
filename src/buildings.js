@@ -5,7 +5,7 @@ export default {
             height: 1,
             updated: true,
             update: function(){
-                if(Math.random() < 0.1){
+                if(Math.random() < 0.05){
                     if(this.height < 5){
                         this.height += 1;
                         this.updated = true;
@@ -20,7 +20,7 @@ export default {
             height: 1,
             updated: true,
             update: function(){
-                if(Math.random() < 0.01){
+                if(Math.random() < 0.05){
                     if(this.height < 5){
                         this.height += 1;
                         this.updated = true;
@@ -35,7 +35,7 @@ export default {
             height: 1,
             updated: true,
             update: function(){
-                if(Math.random() < 0.01){
+                if(Math.random() < 0.05){
                     if(this.height < 5){
                         this.height += 1;
                         this.updated = true;
