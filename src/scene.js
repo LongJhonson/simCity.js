@@ -50,19 +50,21 @@ export function createScene() {
   function update(city) {
     for (let x = 0; x < city.size; x++) {
       for (let y = 0; y < city.size; y++) {
-        const currentBuildingId = buildings[x][y]?.userData.id;
-        const newBuildingId = city.data[x][y].buildingId;
+        const tile = city.data[x][y];
+        const existingBuildingMesh = buildings[x][y];
+    
 
         //if the player removes a building, remove it from scene
-        if (!newBuildingId && currentBuildingId) {
-          scene.remove(buildings[x][y]);
+        if (!tile.building && existingBuildingMesh) {
+          scene.remove(existingBuildingMesh);
           buildings[x][y] = undefined;
         }
         //if the data model has changed, update the mesh
-        if (newBuildingId && newBuildingId !== currentBuildingId) {
-          scene.remove(buildings[x][y]);
-          buildings[x][y] = createAssetInstance(newBuildingId, x, y);
+        if (tile.building && tile.building.updated) {
+          scene.remove(existingBuildingMesh);
+          buildings[x][y] = createAssetInstance(tile.building.id, x, y, tile.building);
           scene.add(buildings[x][y]);
+          tile.building.updated = false;
         }
       }
     }

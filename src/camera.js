@@ -10,7 +10,8 @@ export function createCamera(gameWindow) {
   const MAX_CAMERA_RADIUS = 20;
   const MIN_CAMERA_ELEVATION = 30;
   const MAX_CAMERA_ELEVATION = 90;
-  const ROTATION_SENSITIVITY = 0.5;
+
+  const ROTATION_SENSITIVITY = 0.2;
   const ZOOM_SENSITIVITY = 0.02;
   const PAN_SENSITIVITY = -0.01;
 
@@ -19,13 +20,13 @@ export function createCamera(gameWindow) {
   const DEG2RAD = Math.PI / 180.0;
 
   const camera = new THREE.PerspectiveCamera(
-    75,
+    45,
     gameWindow.offsetWidth / gameWindow.offsetHeight,
     0.1,
     1000
   );
 
-  let cameraOrigin = new THREE.Vector3();
+  let cameraOrigin = new THREE.Vector3(8,0,8);
   let cameraRadius = (MIN_CAMERA_RADIUS + MAX_CAMERA_RADIUS) / 2;
   let cameraAzimuth = 135;
   let cameraElevation = 45;
