@@ -50,7 +50,6 @@ export function createCamera(gameWindow) {
   }
 
   function onMouseUp(e) {
-    console.log("MouseUp");
     if (e.button === LEFT_MOUSE_BUTTON) {
       isLeftMouseDown = false;
     }

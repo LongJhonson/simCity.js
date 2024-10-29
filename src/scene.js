@@ -18,8 +18,14 @@ export function createScene() {
   const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
   const mesh = new THREE.Mesh(geometry, material);
 
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  let selectedObject = undefined;
+
   let terrain = [];
   let buildings = [];
+
+  let onObjectSelected = undefined;
 
   function initialize(city) {
     scene.clear();
@@ -34,7 +40,6 @@ export function createScene() {
         scene.add(mesh);
         //3 Add that mesh to the meshes array
         column.push(mesh);
-        
       }
       terrain.push(column);
       buildings.push([...Array(city.size)]);
@@ -42,23 +47,23 @@ export function createScene() {
     setupLights();
   }
 
-  function update(city){
+  function update(city) {
     for (let x = 0; x < city.size; x++) {
       for (let y = 0; y < city.size; y++) {
-       const currentBuildingId = buildings[x][y]?.userData.id;
-       const newBuildingId = city.data[x][y].buildingId;
+        const currentBuildingId = buildings[x][y]?.userData.id;
+        const newBuildingId = city.data[x][y].buildingId;
 
-       //if the player removes a building, remove it from scene
-        if(!newBuildingId && currentBuildingId){
+        //if the player removes a building, remove it from scene
+        if (!newBuildingId && currentBuildingId) {
           scene.remove(buildings[x][y]);
           buildings[x][y] = undefined;
         }
-       //if the data model has changed, update the mesh
-       if(newBuildingId !== currentBuildingId){
-        scene.remove(buildings[x][y])
-        buildings[x][y] = createAssetInstance(newBuildingId, x, y)
-        scene.add(buildings[x][y])
-       }
+        //if the data model has changed, update the mesh
+        if (newBuildingId !== currentBuildingId) {
+          scene.remove(buildings[x][y]);
+          buildings[x][y] = createAssetInstance(newBuildingId, x, y);
+          scene.add(buildings[x][y]);
+        }
       }
     }
   }
@@ -91,8 +96,27 @@ export function createScene() {
   }
 
   function onMouseDown(e) {
-    e.preventDefault();
     camera.onMouseDown(e);
+
+    mouse.x = (e.clientX / renderer.domElement.clientWidth) * 2 - 1;
+    mouse.y = -(e.clientY / renderer.domElement.clientHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera.camera);
+
+    let intersections = raycaster.intersectObjects(scene.children, false);
+
+    if (intersections.length > 0) {
+      if (selectedObject) {
+        selectedObject.material.emissive.setHex(0);
+      }
+      selectedObject = intersections[0].object;
+      selectedObject.material.emissive.setHex(0x55555);
+      console.log(selectedObject.userData)
+
+      if(this.onObjectSelected){
+        this.onObjectSelected(selectedObject);
+      }
+    }
   }
 
   function onMouseUp(e) {
@@ -110,6 +134,7 @@ export function createScene() {
     onMouseUp,
     onMouseMove,
     initialize,
-    update
+    update,
+    onObjectSelected
   };
 }
