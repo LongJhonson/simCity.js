@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { createCamera } from "./camera";
+import { createAssetInstance } from "./assets";
 
 export function createScene() {
   //initial scene setup
@@ -9,7 +10,6 @@ export function createScene() {
 
   const camera = createCamera(gameWindow);
 
-
   const renderer = new THREE.WebGLRenderer();
   renderer.setSize(gameWindow.offsetWidth, gameWindow.offsetHeight);
   gameWindow.appendChild(renderer.domElement);
@@ -17,7 +17,66 @@ export function createScene() {
   const geometry = new THREE.BoxGeometry(1, 1, 1);
   const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
   const mesh = new THREE.Mesh(geometry, material);
-  scene.add(mesh);
+
+  let terrain = [];
+  let buildings = [];
+
+  function initialize(city) {
+    scene.clear();
+    terrain = [];
+    buildings = [];
+    for (let x = 0; x < city.size; x++) {
+      const column = [];
+      for (let y = 0; y < city.size; y++) {
+        const terrainId = city.data[x][y].terrainId;
+        const mesh = createAssetInstance(terrainId, x, y);
+        //2 Add the mesh to the scene
+        scene.add(mesh);
+        //3 Add that mesh to the meshes array
+        column.push(mesh);
+        
+      }
+      terrain.push(column);
+      buildings.push([...Array(city.size)]);
+    }
+    setupLights();
+  }
+
+  function update(city){
+    for (let x = 0; x < city.size; x++) {
+      for (let y = 0; y < city.size; y++) {
+       const currentBuildingId = buildings[x][y]?.userData.id;
+       const newBuildingId = city.data[x][y].buildingId;
+
+       //if the player removes a building, remove it from scene
+        if(!newBuildingId && currentBuildingId){
+          scene.remove(buildings[x][y]);
+          buildings[x][y] = undefined;
+        }
+       //if the data model has changed, update the mesh
+       if(newBuildingId !== currentBuildingId){
+        scene.remove(buildings[x][y])
+        buildings[x][y] = createAssetInstance(newBuildingId, x, y)
+        scene.add(buildings[x][y])
+       }
+      }
+    }
+  }
+
+  function setupLights() {
+    const lights = [
+      new THREE.AmbientLight(0xffffff, 0.2),
+      new THREE.DirectionalLight(0xffffff, 0.3),
+      new THREE.DirectionalLight(0xffffff, 0.3),
+      new THREE.DirectionalLight(0xffffff, 0.3),
+    ];
+
+    lights[1].position.set(0, 1, 0);
+    lights[2].position.set(1, 1, 0);
+    lights[3].position.set(0, 1, 1);
+
+    scene.add(...lights);
+  }
 
   function draw() {
     renderer.render(scene, camera.camera);
@@ -50,5 +109,7 @@ export function createScene() {
     onMouseDown,
     onMouseUp,
     onMouseMove,
+    initialize,
+    update
   };
 }
